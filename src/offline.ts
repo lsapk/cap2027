@@ -1,0 +1,4 @@
+import type {Snapshot} from './types';
+function open():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const r=indexedDB.open('cap2027-public-cache',1);r.onupgradeneeded=()=>r.result.createObjectStore('snapshots');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+export async function readCache():Promise<Snapshot|null>{let db:IDBDatabase|undefined;try{db=await open();return await new Promise((resolve,reject)=>{const r=db!.transaction('snapshots').objectStore('snapshots').get('latest');r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);});}catch{return null;}finally{db?.close();}}
+export async function writeCache(data:Snapshot){let db:IDBDatabase|undefined;try{db=await open();await new Promise<void>((resolve,reject)=>{const t=db!.transaction('snapshots','readwrite');t.objectStore('snapshots').put(data,'latest');t.oncomplete=()=>resolve();t.onerror=()=>reject(t.error);});}catch{}finally{db?.close();}}

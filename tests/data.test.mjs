@@ -1,0 +1,15 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {csv,normalize,safeUrl,slug} from '../scripts/data-core.mjs';
+const snapshot=JSON.parse(fs.readFileSync(new URL('../public/data.json',import.meta.url)));
+test('CSV : guillemets, accents, virgules et retours à la ligne',()=>{assert.deepEqual(csv('nom,texte\r\n"Élodie","Une idée, puis ""deux""\nlignes"\r\n'),[{nom:'Élodie',texte:'Une idée, puis "deux"\nlignes'}]);});
+test('CSV HATVP : séparateur point-virgule',()=>assert.deepEqual(csv('prenom;nom\nÉlodie;DUPONT',';'),[{prenom:'Élodie',nom:'DUPONT'}]));
+test('Un CSV tronqué est rejeté',()=>assert.throws(()=>csv('nom,texte\n"non terminé')));
+test('Les liens actifs n’acceptent que HTTPS',()=>{assert.equal(safeUrl('javascript:alert(1)'),'');assert.equal(safeUrl('http://example.org'),'');assert.equal(safeUrl('https://example.org'),'https://example.org/');});
+test('Identifiants normalisés et stables',()=>assert.equal(slug('Jean-Luc Mélenchon'),'jean-luc-melenchon'));
+test('Un registre de candidatures invalide ne remplace pas le relevé',()=>assert.throws(()=>normalize({candidates:'nom,statut\nFausse donnée,inconnue'})));
+test('Chaque proposition garde des sources et des candidats existants',()=>{const ids=new Set(snapshot.candidates.map(c=>c.id));for(const p of snapshot.proposals){assert.ok(p.sources.length);assert.ok(p.candidateIds.length);assert.ok(p.candidateIds.every(id=>ids.has(id)));assert.ok(p.period);}});
+test('Chaque vote conserve une pièce officielle et une position individuelle',()=>{const ids=new Set(snapshot.candidates.map(c=>c.id));for(const v of snapshot.votes){assert.match(new URL(v.url).hostname,/(assemblee-nationale\.fr|senat\.fr|europarl\.europa\.eu)$/);assert.ok(Object.keys(v.positions).length);assert.ok(Object.keys(v.positions).every(id=>ids.has(id)));}});
+test('Un parrainage inconnu reste absent et ne devient pas zéro',()=>{if(!snapshot.endorsements.available){assert.deepEqual(snapshot.endorsements.history,[]);assert.equal(snapshot.endorsements.publishedAt,null);}});
+test('Les déclarations HATVP pointent exclusivement vers l’autorité',()=>{for(const c of snapshot.candidates)for(const d of c.transparency||[])if(d.url)assert.equal(new URL(d.url).hostname,'www.hatvp.fr');});
