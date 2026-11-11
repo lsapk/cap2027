@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {validateSnapshot} from '../src/quality.ts';
+const data=JSON.parse(fs.readFileSync(new URL('../public/data.json',import.meta.url)));
+test('Une absence non recoupée n’est pas affichée comme un vote',()=>{const d=structuredClone(data);d.votes=[{id:'test',date:'2026-01-01',url:'https://www.assemblee-nationale.fr/test',positions:{[d.candidates[0].id]:'absent'}}];assert.equal(validateSnapshot(d).votes.length,0);});
+test('Un scrutin futur est écarté',()=>{const d=structuredClone(data);d.votes=[{id:'test',date:'2099-01-01',url:'https://www.assemblee-nationale.fr/test',positions:{[d.candidates[0].id]:'pour'}}];assert.equal(validateSnapshot(d).votes.length,0);});
+test('Les homonymes d’identifiant bloquent le relevé',()=>{const d=structuredClone(data);d.candidates.push(d.candidates[0]);assert.throws(()=>validateSnapshot(d));});
+test('Un domaine officiel imité est écarté',()=>{const d=structuredClone(data);d.votes=[{id:'test',date:'2026-01-01',url:'https://assemblee-nationale.fr.example.org/test',positions:{[d.candidates[0].id]:'pour'}}];assert.equal(validateSnapshot(d).votes.length,0);});
+test('La validation ne transforme pas une compilation en source officielle',()=>{const d=validateSnapshot(data);assert.ok(d.sources.some(s=>s.kind==='Compilation indépendante'));assert.ok(d.proposals.every(p=>p.publisher==='PromethEUs'));});

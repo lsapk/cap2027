@@ -64,3 +64,16 @@ node scripts/verify-api.mjs
 - Vérification navigateur de la recherche, de la fiche, du comparateur et du filtrage thématique sur ordinateur et téléphone.
 
 Le parcours de connexion avec le vrai compte, la synchronisation entre deux appareils et une réponse effective du fournisseur IA demandent une session utilisateur : ils ne sont pas présentés comme validés de bout en bout. Le projet Supabase existant possède par ailleurs des avis de configuration et de version antérieurs à cette application ; ils n’ont pas été modifiés dans ce travail.
+
+## Mise à jour : paramètres et vérifications réelles
+
+- Thèmes clair, sombre et automatique, mémorisés sur l’appareil ; texte plus lisible, mouvements réduits et portraits distants désactivables.
+- Polices servies localement, sans requête Google Fonts lors des visites.
+- Contact publié à la demande de l’éditeur : Deepflow.ia@gmail.com. Informations légales et confidentialité accessibles depuis le pied de page. L’identité juridique complète reste à compléter avant une ouverture publique.
+- Synchronisation des favoris facultative, désactivée par défaut, avec consentement explicite stocké dans `sync_consent` et `consent_at`. Le retrait enlève les préférences du serveur.
+- Accord explicite dans le chat avant d’envoyer la question et le court historique au fournisseur IA.
+- Création d’un compte synthétique, connexion, écriture/lecture de favoris et réponse réelle du fournisseur IA testées avec succès le 11 novembre 2026, sans envoi d’e-mail. Le projet autorise actuellement l’inscription immédiate. Les identifiants du test n’ont pas été enregistrés. Le nettoyage du compte synthétique attend une autorisation de contrôle automatique.
+- Les deux URLs exactes de Cap 2027 ont été ajoutées aux retours autorisés de Supabase. Le Site URL partagé et les redirections des autres applications sont conservés. La réception d’un véritable e-mail de récupération n’a pas été testée.
+- Quinze tests passent, dont le rejet des dates futures, des domaines officiels imités et des identités dupliquées. Les mentions d’absence non recoupées sont écartées à l’affichage. Cela ne garantit pas l’exactitude de chaque source.
+- La fonction serveur de collecte/IA conserve sa version existante : la mise à jour proposée a été refusée par le contrôle automatique. Les protections d’affichage et les paramètres n’exigent pas de remplacer cette fonction.
+- `supabase/retention-proposal.sql` est une proposition non appliquée : la purge automatique des compteurs de plus de 30 jours a été refusée faute d’autorisation explicite. Aucune durée maximale de 30 jours n’est donc présentée comme déjà assurée.

@@ -3,7 +3,7 @@ create table public.cap27_snapshot (id integer primary key check(id=1), payload 
 alter table public.cap27_snapshot enable row level security;
 grant select on public.cap27_snapshot to anon, authenticated;
 create policy cap27_snapshot_read on public.cap27_snapshot for select to anon,authenticated using(true);
-create table public.cap27_preferences (user_id uuid primary key references auth.users(id) on delete cascade, favorites text[] not null default '{}', themes text[] not null default '{}', alerts jsonb not null default '{"programme":true,"candidature":true,"vote":true,"parrainage":true}', last_seen timestamptz not null default now(), updated_at timestamptz not null default now());
+create table public.cap27_preferences (user_id uuid primary key references auth.users(id) on delete cascade, sync_consent boolean not null default false, consent_at timestamptz, favorites text[] not null default '{}', themes text[] not null default '{}', alerts jsonb not null default '{"programme":true,"candidature":true,"vote":true,"parrainage":true}', last_seen timestamptz not null default now(), updated_at timestamptz not null default now());
 alter table public.cap27_preferences enable row level security;
 grant select,insert,update,delete on public.cap27_preferences to authenticated;
 create policy cap27_preferences_read on public.cap27_preferences for select to authenticated using((select auth.uid())=user_id);
