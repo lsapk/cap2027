@@ -63,7 +63,7 @@ node scripts/verify-api.mjs
 - Vérification réelle de la lecture du relevé, de l’invisibilité des préférences sans connexion, du refus des RPC serveur au rôle anonyme et du refus de l’assistant sans session utilisateur.
 - Vérification navigateur de la recherche, de la fiche, du comparateur et du filtrage thématique sur ordinateur et téléphone.
 
-Le parcours de connexion avec le vrai compte, la synchronisation entre deux appareils et une réponse effective du fournisseur IA demandent une session utilisateur : ils ne sont pas présentés comme validés de bout en bout. Le projet Supabase existant possède par ailleurs des avis de configuration et de version antérieurs à cette application ; ils n’ont pas été modifiés dans ce travail.
+La création de compte, la connexion, les favoris et une réponse IA ont été vérifiés avec un compte synthétique (voir ci-dessous). Le parcours avec un vrai compte et la synchronisation entre deux appareils restent à vérifier. Le projet Supabase existant possède par ailleurs des avis de configuration et de version antérieurs à cette application ; ils n’ont pas été modifiés dans ce travail.
 
 ## Mise à jour : paramètres et vérifications réelles
 
@@ -77,3 +77,13 @@ Le parcours de connexion avec le vrai compte, la synchronisation entre deux appa
 - Quinze tests passent, dont le rejet des dates futures, des domaines officiels imités et des identités dupliquées. Les mentions d’absence non recoupées sont écartées à l’affichage. Cela ne garantit pas l’exactitude de chaque source.
 - La fonction serveur de collecte/IA conserve sa version existante : la mise à jour proposée a été refusée par le contrôle automatique. Les protections d’affichage et les paramètres n’exigent pas de remplacer cette fonction.
 - `supabase/retention-proposal.sql` est une proposition non appliquée : la purge automatique des compteurs de plus de 30 jours a été refusée faute d’autorisation explicite. Aucune durée maximale de 30 jours n’est donc présentée comme déjà assurée.
+
+## Déploiement Vercel depuis GitHub
+
+Le dépôt privé GitHub est `lsapk/cap2027`. `vercel.json` configure Vite, `npm ci`, `npm run build` et la sortie `dist`. Le service worker doit être revalidé à chaque visite. Le code adapte les informations d’hébergement au domaine Sites ou Vercel.
+
+Le backend Supabase et sa collecte planifiée restent indépendants de l’hébergeur du frontend. Aucune clé serveur ni clé IA n’est requise dans Vercel : le client utilise uniquement la clé publique de `src/config.ts`. Ne jamais mettre une clé `service_role` dans les variables Vite.
+
+Pour chaque domaine de production, autoriser exactement `https://DOMAINE/` et `https://DOMAINE/#recuperation` dans Supabase → Authentication → URL Configuration. Conserver le Site URL partagé et les redirections des autres applications. Ne pas utiliser une autorisation générique de tous les domaines `vercel.app`.
+
+Le dépôt ne déploie ni le schéma SQL ni la fonction Supabase automatiquement. `supabase/retention-proposal.sql` reste une proposition non appliquée.
